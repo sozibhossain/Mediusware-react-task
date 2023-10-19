@@ -1,12 +1,71 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 const Problem1 = () => {
-
+    const [newName, setNewName] = useState("");
+    const [newStatus, setNewStatus] = useState("");
+    const [tasks, setTasks] = useState ([]);
     const [show, setShow] = useState('all');
+
+
+    
 
     const handleClick = (val) =>{
         setShow(val);
     }
+
+    const handleShowAllSubmit = () => {
+        const newAllItemShow = {
+            name:newName,
+            status:newStatus
+        }
+        console.log(newAllItemShow);
+
+        const updatedItemArr = [...tasks];
+        updatedItemArr.push(newAllItemShow);
+        setTasks(updatedItemArr);
+        localStorage.setItem( 'taskAdd', JSON.stringify(updatedItemArr))
+    }
+
+    useEffect(() =>{
+        const savedItem =JSON.parse(localStorage.getItem('taskAdd'));
+
+        if(savedItem){
+            setTasks(savedItem)
+        }
+    },{})
+
+    // filtered-Tasks
+    const filteredTasks = tasks.filter((task) => {
+        if (show === "active") {
+          return task.status.toLowerCase() === "active";
+        } else if (show === "completed") {
+          return task.status.toLowerCase() === "completed";
+        }
+        return true;
+    });
+
+    // filtered-short-Tasks
+    filteredTasks.sort((x, y) => {
+        if (x.status.toLowerCase() === "active") {
+            return -1;
+        } else if (y.status.toLowerCase() === "active") {
+            return 1;
+        } else if (x.status.toLowerCase() === "completed") {
+            return -1;
+        } else if (y.status.toLowerCase() === "completed") {
+            return 1;
+        } else if (x.status.toLowerCase() === "pending") {
+            return -1;
+        } else if (y.status.toLowerCase() === "pending") {
+            return 1;
+        } else if (x.status.toLowerCase() === "archive") {
+            return -1;
+        } else if (y.status.toLowerCase() === "archive") {
+            return 1;
+        }
+        return 0;
+    });
+
 
     return (
 
@@ -16,13 +75,13 @@ const Problem1 = () => {
                 <div className="col-6 ">
                     <form className="row gy-2 gx-3 align-items-center mb-4">
                         <div className="col-auto">
-                            <input type="text" className="form-control" placeholder="Name"/>
+                            <input type="text" className="form-control" placeholder="Name" value={newName} onChange={(e) =>  setNewName(e.target.value)}/>
                         </div>
                         <div className="col-auto">
-                            <input type="text" className="form-control" placeholder="Status"/>
+                            <input type="text" className="form-control" placeholder="Status" value={newStatus} onChange={(e) =>  setNewStatus(e.target.value)}/>
                         </div>
                         <div className="col-auto">
-                            <button type="submit" className="btn btn-primary">Submit</button>
+                            <button type="submit" className="btn btn-primary" onClick={handleShowAllSubmit}>Submit</button>
                         </div>
                     </form>
                 </div>
@@ -47,7 +106,16 @@ const Problem1 = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        
+                            {
+                                filteredTasks.map((item, index) => {
+                                    return(
+                                        <tr key={index}>
+                                            <td>{item.name}</td>
+                                            <td>{item.status}</td>
+                                        </tr>
+                                    )
+                                })
+                            }
                         </tbody>
                     </table>
                 </div>
